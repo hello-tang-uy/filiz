@@ -99,11 +99,14 @@ export function Header() {
     const panel = contentRef.current;
     if (!openId || !panel) return undefined;
     const measure = () => {
-      setPanelHeight(panel.scrollHeight);
+      const inner = panel.querySelector(".mega-inner");
+      setPanelHeight((inner || panel).scrollHeight);
     };
     const frame = window.requestAnimationFrame(measure);
     const observer = new ResizeObserver(measure);
     observer.observe(panel);
+    const inner = panel.querySelector(".mega-inner");
+    if (inner) observer.observe(inner);
     return () => {
       window.cancelAnimationFrame(frame);
       observer.disconnect();

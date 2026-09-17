@@ -221,7 +221,6 @@ button {
   left: 0;
   z-index: 1;
   width: 100%;
-  min-height: 100%;
   background: var(--paper);
   pointer-events: none;
   backface-visibility: hidden;
@@ -231,6 +230,11 @@ button {
   position: relative;
   z-index: 2;
   pointer-events: auto;
+}
+
+.mega-panel.to-start,
+.mega-panel.to-end {
+  min-height: 100%;
 }
 
 .mega-panel.from-end {
