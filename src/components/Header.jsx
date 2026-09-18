@@ -304,33 +304,7 @@ export function Header() {
                 </button>
                 {mobileSection === item.id && (
                   <div className="mobile-panel">
-                    {item.columns.map((column) => (
-                      <div key={column.title} className="mobile-col">
-                        <p>{column.title}</p>
-                        {column.items.map((link) => (
-                          <Link
-                            key={link.href}
-                            className="mega-item"
-                            data-tone={column.tone}
-                            to={link.href}
-                            onClick={() => setMobileOpen(false)}
-                          >
-                            <Icon name={link.icon} />
-                            <span>
-                              <strong>{link.label}</strong>
-                              <em>{link.description}</em>
-                            </span>
-                          </Link>
-                        ))}
-                      </div>
-                    ))}
-                    {item.features?.map((feature) => (
-                      <FeatureCard
-                        key={feature.href}
-                        feature={feature}
-                        onClick={() => setMobileOpen(false)}
-                      />
-                    ))}
+                    <MegaSlots item={item} onItemClick={() => setMobileOpen(false)} />
                     {item.banner && (
                       <Link className="mobile-banner" to={item.banner.href} onClick={() => setMobileOpen(false)}>
                         <strong>{item.banner.title}</strong>
@@ -365,29 +339,75 @@ export function Header() {
   );
 }
 
+function MegaNavItem({ item, tone, onClick }) {
+  const content = (
+    <>
+      <Icon name={item.icon} />
+      <span>
+        <strong>
+          {item.label}
+          {item.soon ? <span className="mega-badge">Soon</span> : null}
+        </strong>
+        {item.description ? <em>{item.description}</em> : null}
+      </span>
+    </>
+  );
+
+  if (item.soon) {
+    return (
+      <span className="mega-item is-soon" aria-disabled="true">
+        {content}
+      </span>
+    );
+  }
+
+  return (
+    <Link className="mega-item" data-tone={tone} to={item.href} onClick={onClick}>
+      {content}
+    </Link>
+  );
+}
+
+function MegaColumn({ column, onItemClick }) {
+  return (
+    <div className="mega-col">
+      <p className="mega-col-title">
+        {column.title}
+        {column.badge ? <span className="mega-badge">{column.badge}</span> : null}
+      </p>
+      {column.items.map((link) => (
+        <MegaNavItem key={link.href} item={link} tone={column.tone} onClick={onItemClick} />
+      ))}
+    </div>
+  );
+}
+
+function MegaSlots({ item, onItemClick }) {
+  const split = item.featureAfter ?? item.columns.length;
+  const features = item.features?.map((feature) => (
+    <FeatureCard key={feature.href} feature={feature} onClick={onItemClick} />
+  ));
+
+  return (
+    <>
+      {item.columns.slice(0, split).map((column) => (
+        <MegaColumn key={column.title} column={column} onItemClick={onItemClick} />
+      ))}
+      {features}
+      {item.columns.slice(split).map((column) => (
+        <MegaColumn key={column.title} column={column} onItemClick={onItemClick} />
+      ))}
+    </>
+  );
+}
+
 function MegaPanel({ item }) {
   const slots = item.columns.length + (item.features?.length || 0);
 
   return (
     <div className="mega-inner" role="region" aria-label={item.label}>
       <div className={`mega-grid cols-${slots}`}>
-        {item.columns.map((column) => (
-          <div key={column.title} className="mega-col">
-            <p className="mega-col-title">{column.title}</p>
-            {column.items.map((link) => (
-              <Link key={link.href} className="mega-item" data-tone={column.tone} to={link.href}>
-                <Icon name={link.icon} />
-                <span>
-                  <strong>{link.label}</strong>
-                  {link.description && <em>{link.description}</em>}
-                </span>
-              </Link>
-            ))}
-          </div>
-        ))}
-        {item.features?.map((feature) => (
-          <FeatureCard key={feature.href} feature={feature} />
-        ))}
+        <MegaSlots item={item} />
       </div>
       {item.banner && (
         <Link className="mega-banner" data-tone={item.banner.tone} to={item.banner.href}>
